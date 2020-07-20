@@ -1,4 +1,78 @@
 from time import sleep
+from numpy import random
+
+def firstDec(AList, BList):
+	printList(AList, 'AList')
+	# создаем список возможных чисел в массиве для каждой ячейки
+	tempList = getTempRowList(BList, AList)
+
+	print('tempList - ', tempList)
+	arg = decision(AList, tempList)
+
+	if (arg[0] == 1):
+		printList(AList, 'AList')
+		return 0
+
+	for ir in range(3):
+		for iy in range(3):
+			out = sposob(arg[1], ir, iy)
+			if out == 1:
+				arg = decision(AList, tempList)
+
+	if (arg[0] == 1):
+		printList(AList, 'AList')
+		return 0
+	return arg
+
+def randomDec(arg, BList, maxInterval = 3, effAll = 3111):
+	oldList = [0]
+	tries = [0]
+	tries.clear()
+	oldList.clear()
+
+	for effort in range(effAll):
+		minimal = 100
+		maximal = 0
+		tempList = getTempRowList(BList, arg[0])
+		arg = decision(arg[0], tempList)
+		tempC = cloneList(arg[0])
+		tempR = cloneList(arg[1])
+		print('----------------------------------- Попытка №', effort, ' -----------------------------------')
+		wrong = 1
+		i = 0
+		for x in tempR:
+			k = 0
+			for y in x:
+				if (len(y) > maximal):
+					maximal = len(y)
+				if (len(y) > 0 and len(y) < minimal):
+					minimal = len(y)
+
+				if (len(y) > 1 and len(y) <= maxInterval):
+					check = 0
+					t = random.choice(y)
+					wrong = 0
+					for item in oldList:
+						if (item == [i,k,t]):
+							check = 1
+					if (check == 0):
+						tempR[i][k] = [t]
+						oldList.append([i,k,t])
+						arguments = decision(tempC, tempR)
+						if (arguments[0] == 1):
+							printList(tempC, 'tempC')
+							return
+					else:
+						print('choise is went ', t)
+				k += 1
+			i += 1
+		tries.append(oldList.copy())
+		printList(tempC, 'tempC')
+		oldList.clear()
+		if (wrong):
+			print('увеличьте интервал подбора - ', minimal, maximal)
+			return
+	return tries
 
 def sposob(trl, row = 0, kvadrat = 0):
 	kvadrat = kvadrat * 3
@@ -9,10 +83,8 @@ def sposob(trl, row = 0, kvadrat = 0):
 	result2.clear()
 	for i in range(row, row+3):
 		for k in range(kvadrat, kvadrat+3):
-			# if (len(trl[i][k]) > 0):
 			result.append(list(set(trl[i][k]) & set(result2)))
 			result2 = list(set(trl[i][k]) ^ set(result2))
-			# print('trl[i][k] - ', trl[i][k],i,k)
 			k += 1
 		i += 1
 	for rem in result:
@@ -22,7 +94,6 @@ def sposob(trl, row = 0, kvadrat = 0):
 					result2.remove(m)
 				except ValueError:
 					pass
-	# print('result - ', result2)
 	coords = [0]
 	coords.clear()
 	if len(result2) == 1:
@@ -33,7 +104,6 @@ def sposob(trl, row = 0, kvadrat = 0):
 					trl[i][k] = result2
 				except ValueError:
 					pass
-		#result=list(set(Word) ^ set(Ans))
 	return 1
 
 def defSquare():
@@ -44,7 +114,6 @@ def defSquare():
 	resTRow.clear()
 	for i in range(0,7,3):
 		for k in range(n):
-			# print(i,k, [[k,i],[k,1+i],[k,2+i]])
 			resT.append([k,i])
 			resT.append([k,1+i])
 			resT.append([k,2+i])
@@ -54,7 +123,6 @@ def defSquare():
 	resT.clear()
 	for i in range(0,7,3):
 		for k in range(n,n+3):
-			# print(i,k, [[k,i],[k,1+i],[k,2+i]])
 			resT.append([k,i])
 			resT.append([k,1+i])
 			resT.append([k,2+i])
@@ -63,13 +131,11 @@ def defSquare():
 	resT.clear()
 	for i in range(0,7,3):
 		for k in range(n+3,n+6):
-			# print(i,k, [[k,i],[k,1+i],[k,2+i]])
 			resT.append([k,i])
 			resT.append([k,1+i])
 			resT.append([k,2+i])
 		resTRow.append(resT.copy())
 		resT.clear()
-	# print(resTRow)
 
 	tempClone = [	
 					[resTRow[0],resTRow[0],resTRow[0],resTRow[1],resTRow[1],resTRow[1],resTRow[2],resTRow[2],resTRow[2]],
@@ -93,14 +159,12 @@ def getTempRowList(B, A):
 	for x in A:
 		j = 0
 		for y in x:
-			# print(l, j, y, end='  ')
 			if (y > 0):
 				tmp[j] = [y]
 			else:
 				tmp[j] = B.copy()
 			j += 1
 		tempRowList.append(tmp.copy())
-		# print(tmp)
 		l += 1
 	return tempRowList
 
@@ -111,11 +175,9 @@ def cloneList(list):
 	for x in list:
 		j = 0
 		for y in x:
-			# print(l, j, y, end='  ')
 			tmp[j] = y
 			j += 1
 		tempList.append(tmp.copy())
-		# print(tmp)
 	return tempList
 
 def printList(array, name = ''):
@@ -126,78 +188,53 @@ def printList(array, name = ''):
 	print(' --- PRINT LIST ', name, ' --- ')
 	pass
 
-def antw(A, tempRowList, screen = 0):
+def decision(A, tempRowList, screen = 0):
 	change = 1
-	tmpSquare = defSquare()
+	square = 1
+	if (len(tempRowList) != 9):
+		square = 0
+	if (square):
+		tmpSquare = defSquare()
+
 	while change > 0:
 		k = 0
 		l = 0
-		# print(' ---  NEW CICLE A - ', tempRow)
 		change = 0
 		varNul = 0
 		for row in A:
-			#print()
-			# print(' --- NEW CICLE --- ', k)
 			i = 0
-			# temp = B.copy()
 			for elem in row:
-				#print()
-				# print(' --- NEW ROW --- ', i)
 				if elem>0:
 					try:
-						# print('A - ', A)
-						# print('row - ', row)
-						# print('tempRow - ', tempRow)
-						# print('temp - ', temp)
-						# print('k - ', k)
-						# print('i - ', i)
-						# print('elem - ', elem)
-						# temp.remove(elem)
 						r = 0
-						for temp in range(9):
+						for temp in range(len(tempRowList)):
 							try:
-								# print('r,i,elem - ', r,i,elem)
 								tempRowList[r][i].remove(elem)
 							except ValueError:
 								if (screen):
-									print('-', end='')
+									print('-', r, i, '-', end='')
 							try:
-								# print('k,r,elem - ', k,r,elem)
 								tempRowList[k][r].remove(elem)
 							except ValueError:
 								if (screen):
-									print('-', end='')
+									print('-', k, r, '-', end='')
 							r += 1
 
-						
-							res = tmpSquare[k][i]
-							# print('res - ', res)
-							for item in res:
-								try:
-									# print('k,i - ', k,i)
-									# print('item,elem - ', item,elem)
-									tempRowList[item[0]][item[1]].remove(elem)
-								except ValueError:
-									if (screen):
-										print('-', end='')
-						
-
-						# print('tempRow - ', tempRow)
-						# print('temp - ', temp)
+							if (square):
+								res = tmpSquare[k][i]
+								for item in res:
+									try:
+										tempRowList[item[0]][item[1]].remove(elem)
+									except ValueError:
+										if (screen):
+											print('-', end='')
 					except ValueError:
 						if (screen):
 							print(' Неверный шаг - откатываемся!')
-						# A[lastRow][lastIndex] = 0
 				else:
 					index = i
 					varNul += 1
 				i += 1
-
-			# print('temp, index, k, A[index][k-1]', temp, index, k, A[k][index])
-			# if (len(temp) == 1 and A[k][index] == 0):
-			# 	A[k][index] = temp[0]
-			# 	change = 1
-				# print('temp[0], index, k - ', int(temp[0]), index, k)
 			k += 1
 
 		i = 0
@@ -226,7 +263,10 @@ def antw(A, tempRowList, screen = 0):
 			return [A, tempRowList]
 
 def verificate(array, debug = 0):
-	tempRowList = [1,2,3,4,5,6,7,8,9]
+	tempRowList = [0]
+	tempRowList.clear()
+	for i in range(len(array)):
+		tempRowList.append(i+1)
 	tmpX = [0]
 	tmpX.clear()
 	tmpY = [0]
