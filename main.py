@@ -7,6 +7,10 @@
 
 from numpy import random
 import functions as f
+import sys
+
+# оптимальная интервал до 5
+maxInterval = 3
 
 a = [0] * int(input('Введите кол-во строк: '))
 b = [0] * int(input('Введите кол-во столбцов: '))
@@ -39,7 +43,7 @@ arg = f.antw(AList, tempList)
 
 if (arg[0] == 1):
 	f.printList(AList, 'AList')
-	return
+	sys.exit()
 
 for ir in range(3):
 	for iy in range(3):
@@ -49,7 +53,7 @@ for ir in range(3):
 
 if (arg[0] == 1):
 	f.printList(AList, 'AList')
-	return
+	sys.exit()
 #f.printList(arg[0], 'arg[0]')
 
 tempC = f.cloneList(arg[0])
@@ -64,43 +68,48 @@ oldList.clear()
 
 effAll = 3111
 for effort in range(effAll):
+	minimal = 100
+	maximal = 0
 	tempList = f.getTempRowList(BList, arg[0])
 	arg = f.antw(arg[0], tempList)
 	tempC = f.cloneList(arg[0])
 	tempR = f.cloneList(arg[1])
 	print('----------------------------------- Попытка №', effort, ' -----------------------------------')
-	# print('tempR - ', tempR)
-	# print('arg[1] - ', arg[1])
+	wrong = 1
 	i = 0
 	for x in tempR:
 		k = 0
 		for y in x:
-			if (len(y) > 1 and len(y) < 4):
+			if (len(y) > maximal):
+				maximal = len(y)
+			if (len(y) > 0 and len(y) < minimal):
+				minimal = len(y)
+
+			if (len(y) > 1 and len(y) <= maxInterval):
 				check = 0
 				t = random.choice(y)
+				wrong = 0
 				for item in oldList:
 					if (item == [i,k,t]):
 						check = 1
 				if (check == 0):
 					tempR[i][k] = [t]
 					oldList.append([i,k,t])
-					# print('!!!!------------------------ choise is ', oldList, ' -----------------------------------')
 					arguments = f.antw(tempC, tempR)
-					#f.printList(arguments[0], 'arguments')
 					if (arguments[0] == 1):
 						f.printList(tempC, 'tempC')
-						return
+						sys.exit()
 				else:
 					print('choise is went ', t)
-				# print('oldList - ', oldList)
 			k += 1
 		i += 1
 	tries.append(oldList.copy())
-	print('Подбор ключей - ', oldList)
-	#print('Возможные ключей - ', tempR)
+	f.printList(tempC, 'tempC')
 	oldList.clear()
+	if (wrong):
+		print('увеличьте интервал подбора - ', minimal, maximal)
+		sys.exit()
 print()
 print(tries)
 print('------------------------')
-# f.printList(arguments[0], 'A')
 f.printList(tempC, 'tempC')
